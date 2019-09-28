@@ -204,6 +204,7 @@ namespace NCalc
 
 
             var visitor = new EvaluationVisitor(Options);
+            visitor.EvaluateOperator += EvaluateOperator;
             visitor.EvaluateFunction += EvaluateFunction;
             visitor.EvaluateParameter += EvaluateParameter;
             visitor.Parameters = Parameters;
@@ -272,6 +273,7 @@ namespace NCalc
             
         }
 
+        public event EvaluateOperatorHandler EvaluateOperator;
         public event EvaluateFunctionHandler EvaluateFunction;
         public event EvaluateParameterHandler EvaluateParameter;
 

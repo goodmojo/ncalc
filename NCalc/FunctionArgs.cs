@@ -25,16 +25,5 @@ namespace NCalc
             get { return _parameters; }
             set { _parameters = value; }
         }
-
-        public object[] EvaluateParameters()
-        {
-            var values = new object[_parameters.Length];
-            for (int i = 0; i < values.Length; i++)
-            {
-                values[i] = _parameters[i].Evaluate();
-            }
-
-            return values;
-        }
     }
 }

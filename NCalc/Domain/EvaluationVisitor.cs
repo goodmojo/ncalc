@@ -108,6 +108,31 @@ namespace NCalc.Domain
                 return rightValue;
             };
 
+            var args = new OperatorArgs
+            {
+                LeftOperand = new Expression(expression.LeftExpression, _options),
+                RightOperand = new Expression(expression.RightExpression, _options),
+            };
+
+            // Hook evaluators
+            args.LeftOperand.EvaluateOperator += EvaluateOperator;
+            args.LeftOperand.EvaluateFunction += EvaluateFunction;
+            args.LeftOperand.EvaluateParameter += EvaluateParameter;
+            args.LeftOperand.Parameters = Parameters;
+
+            args.RightOperand.EvaluateOperator += EvaluateOperator;
+            args.RightOperand.EvaluateFunction += EvaluateFunction;
+            args.RightOperand.EvaluateParameter += EvaluateParameter;
+            args.RightOperand.Parameters = Parameters;
+            OnEvaluateOperator(expression.Type, args);
+
+            // If an external implementation was found get the result back
+            if (args.HasResult)
+            {
+                Result = args.Result;
+                return;
+            }
+
             switch (expression.Type)
             {
                 case BinaryExpressionType.And:
@@ -243,6 +268,7 @@ namespace NCalc.Domain
             for (int i = 0; i < function.Expressions.Length; i++ )
             {
                 args.Parameters[i] =  new Expression(function.Expressions[i], _options);
+                args.Parameters[i].EvaluateOperator += EvaluateOperator;
                 args.Parameters[i].EvaluateFunction += EvaluateFunction;
                 args.Parameters[i].EvaluateParameter += EvaluateParameter;
 
@@ -618,6 +644,14 @@ namespace NCalc.Domain
             }
         }
 
+        public event EvaluateOperatorHandler EvaluateOperator;
+
+        private void OnEvaluateOperator(BinaryExpressionType type, OperatorArgs args)
+        {
+            if (EvaluateOperator != null)
+                EvaluateOperator(type, args);
+        }
+
         public event EvaluateFunctionHandler EvaluateFunction;
 
         private void OnEvaluateFunction(string name, FunctionArgs args)
@@ -642,6 +676,7 @@ namespace NCalc.Domain
                         expression.Parameters[p.Key] = p.Value;
                     }
 
+                    expression.EvaluateOperator += EvaluateOperator;
                     expression.EvaluateFunction += EvaluateFunction;
                     expression.EvaluateParameter += EvaluateParameter;
 
