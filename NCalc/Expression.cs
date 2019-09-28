@@ -45,6 +45,18 @@ namespace NCalc
             Options = options;
         }
 
+        public event Action<BinaryExpressionType, OperatorArgs> EvaluateOperator;
+        public event Action<string, FunctionArgs> EvaluateFunction;
+        public event Action<string, ParameterArgs> EvaluateParameter;
+
+        private Dictionary<string, object> _parameters;
+
+        public Dictionary<string, object> Parameters
+        {
+            get { return _parameters ?? (_parameters = new Dictionary<string, object>()); }
+            set { _parameters = value; }
+        }
+
         #region Cache management
         private static bool _cacheEnabled = true;
         private static Dictionary<string, WeakReference> _compiledExpressions = new Dictionary<string, WeakReference>();
@@ -328,18 +340,5 @@ namespace NCalc
             return visitor.Result;
             
         }
-
-        public event EvaluateOperatorHandler EvaluateOperator;
-        public event EvaluateFunctionHandler EvaluateFunction;
-        public event EvaluateParameterHandler EvaluateParameter;
-
-        private Dictionary<string, object> _parameters;
-
-        public Dictionary<string, object> Parameters
-        {
-            get { return _parameters ?? (_parameters = new Dictionary<string, object>()); }
-            set { _parameters = value; }
-        }
-
     }
 }

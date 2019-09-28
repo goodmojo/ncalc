@@ -56,9 +56,6 @@
     <Compile Include="Domain\TernaryExpression.cs" />
     <Compile Include="Domain\UnaryExpression.cs" />
     <Compile Include="Domain\Value.cs" />
-    <Compile Include="EvaluateFunctionHandler.cs" />
-    <Compile Include="EvaluateOperatorHandler.cs" />
-    <Compile Include="EvaluateParameterHandler.cs" />
     <Compile Include="EvaluationException.cs" />
     <Compile Include="EvaluationOption.cs" />
     <Compile Include="Expression.cs" />

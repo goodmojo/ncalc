@@ -21,6 +21,30 @@ namespace NCalc.Domain
 
         public object Result { get; private set; }
 
+        public Dictionary<string, object> Parameters { get; set; }
+        public event Action<BinaryExpressionType, OperatorArgs> EvaluateOperator;
+        public event Action<string, FunctionArgs> EvaluateFunction;
+        public event Action<string, ParameterArgs> EvaluateParameter;
+
+        private void OnEvaluateOperator(BinaryExpressionType type, OperatorArgs args)
+        {
+            if (EvaluateOperator != null)
+                EvaluateOperator(type, args);
+        }
+
+        private void OnEvaluateFunction(string name, FunctionArgs args)
+        {
+            if (EvaluateFunction != null)
+                EvaluateFunction(name, args);
+        }
+
+        private void OnEvaluateParameter(string name, ParameterArgs args)
+        {
+            if (EvaluateParameter != null)
+                EvaluateParameter(name, args);
+        }
+
+
         private object Evaluate(LogicalExpression expression)
         {
             expression.Accept(this);
@@ -34,7 +58,7 @@ namespace NCalc.Domain
 
         private static Type[] CommonTypes = new[] { typeof(Int64), typeof(Double), typeof(Boolean), typeof(String), typeof(Decimal) };
 
-    /// <summary>
+        /// <summary>
         /// Gets the the most precise type.
         /// </summary>
         /// <param name="a">Type a.</param>
@@ -87,14 +111,14 @@ namespace NCalc.Domain
             // simulate Lazy<Func<>> behavior for late evaluation
             object leftValue = null;
             Func<object> left = () =>
-                                 {
-                                     if (leftValue == null)
-                                     {
-                                         expression.LeftExpression.Accept(this);
-                                         leftValue = Result;
-                                     }
-                                     return leftValue;
-                                 };
+            {
+                if (leftValue == null)
+                {
+                    expression.LeftExpression.Accept(this);
+                    leftValue = Result;
+                }
+                return leftValue;
+            };
 
             // simulate Lazy<Func<>> behavior for late evaluation
             object rightValue = null;
@@ -258,23 +282,23 @@ namespace NCalc.Domain
         public override void Visit(Function function)
         {
             var args = new FunctionArgs
-                           {
-                               Parameters = new Expression[function.Expressions.Length]
-                           };
+            {
+                Parameters = new Expression[function.Expressions.Length]
+            };
 
             // Don't call parameters right now, instead let the function do it as needed.
             // Some parameters shouldn't be called, for instance, in a if(), the "not" value might be a division by zero
             // Evaluating every value could produce unexpected behaviour
-            for (int i = 0; i < function.Expressions.Length; i++ )
+            for (int i = 0; i < function.Expressions.Length; i++)
             {
-                args.Parameters[i] =  new Expression(function.Expressions[i], _options);
+                args.Parameters[i] = new Expression(function.Expressions[i], _options);
                 args.Parameters[i].EvaluateOperator += EvaluateOperator;
                 args.Parameters[i].EvaluateFunction += EvaluateFunction;
                 args.Parameters[i].EvaluateParameter += EvaluateParameter;
 
                 // Assign the parameters of the Expression to the arguments so that custom Functions and Parameters can use them
                 args.Parameters[i].Parameters = Parameters;
-            }            
+            }
 
             // Calls external implementation
             OnEvaluateFunction(IgnoreCase ? function.Identifier.Name.ToLower() : function.Identifier.Name, args);
@@ -544,7 +568,7 @@ namespace NCalc.Domain
                     break;
 
                 #endregion
-                
+
                 #region Max
                 case "max":
 
@@ -621,7 +645,7 @@ namespace NCalc.Domain
                 #endregion
 
                 default:
-                    throw new ArgumentException("Function not found", 
+                    throw new ArgumentException("Function not found",
                         function.Identifier.Name);
             }
         }
@@ -642,22 +666,6 @@ namespace NCalc.Domain
             {
                 throw new ArgumentException(String.Format("Function not found {0}. Try {1} instead.", called, function));
             }
-        }
-
-        public event EvaluateOperatorHandler EvaluateOperator;
-
-        private void OnEvaluateOperator(BinaryExpressionType type, OperatorArgs args)
-        {
-            if (EvaluateOperator != null)
-                EvaluateOperator(type, args);
-        }
-
-        public event EvaluateFunctionHandler EvaluateFunction;
-
-        private void OnEvaluateFunction(string name, FunctionArgs args)
-        {
-            if (EvaluateFunction != null)
-                EvaluateFunction(name, args);
         }
 
         public override void Visit(Identifier parameter)
@@ -699,16 +707,5 @@ namespace NCalc.Domain
                 Result = args.Result;
             }
         }
-
-        public event EvaluateParameterHandler EvaluateParameter;
-
-        private void OnEvaluateParameter(string name, ParameterArgs args)
-        {
-            if (EvaluateParameter != null)
-                EvaluateParameter(name, args);
-        }
-
-        public Dictionary<string, object> Parameters { get; set; }
-
     }
 }
