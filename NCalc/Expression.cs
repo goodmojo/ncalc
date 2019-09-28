@@ -190,6 +190,55 @@ namespace NCalc
         protected Dictionary<string, IEnumerator> ParameterEnumerators;
         protected Dictionary<string, object> ParametersBackup;
 
+        public bool? ValidateAndEvaluate(
+            IReadOnlyDictionary<string, object> EntityAssignments = null,
+            Func<string, bool> ParameterEvaluator = null,
+            Func<string, bool> FunctionEvaluator = null,
+            Func<string, bool> OperatorEvaluator = null
+        )
+        {
+            this.EvaluateParameter += (name, args) =>
+            {
+                args.Result = ValidateAndEvaluate(
+                    Id: name,
+                    Tester: ParameterEvaluator,
+                    Getter: EntityAssignments
+                );
+            };
+            this.EvaluateFunction += (name, args) =>
+            {
+                args.Result = ValidateAndEvaluate(
+                    Id: name,
+                    Tester: FunctionEvaluator,
+                    Getter: EntityAssignments
+                );
+            };
+            this.EvaluateOperator += (type, args) =>
+            {
+                Evaluators.SetComparisonEvaluator.Evaluate(type, args);
+            };
+            try
+            {
+                var result = this.Evaluate<bool>();
+                return result;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        protected object ValidateAndEvaluate(string Id, Func<string, bool> Tester, IReadOnlyDictionary<string, object> Getter)
+        {
+            if (Getter == null)
+                return null;
+            if (!Getter.TryGetValue(Id, out object value))
+                return null;
+            if (Tester == null || Tester(Id))
+                return value;
+            return null;
+        }
+
         public T Evaluate<T>()
         {
             var resObj = this.Evaluate();
