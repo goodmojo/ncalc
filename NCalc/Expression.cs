@@ -190,6 +190,13 @@ namespace NCalc
         protected Dictionary<string, IEnumerator> ParameterEnumerators;
         protected Dictionary<string, object> ParametersBackup;
 
+        public T Evaluate<T>()
+        {
+            var resObj = this.Evaluate();
+            var res = (T)resObj;
+            return res;
+        }
+
         public object Evaluate()
         {
             if (HasErrors())
