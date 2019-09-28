@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		NCalc.vsmdi = NCalc.vsmdi
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCalc", "Evaluant.Calculator\NCalc.csproj", "{252E5F34-FA82-488A-939D-EF8DDAAB7D2A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NCalc", "NCalc\NCalc.csproj", "{252E5F34-FA82-488A-939D-EF8DDAAB7D2A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
